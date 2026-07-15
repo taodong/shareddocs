@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waterwheel — Automated QA for Engineering Teams</title>
+<style>
+  :root{
+    --navy:#0f2c4c;
+    --blue:#1a73e8;
+    --teal:#12b5a5;
+    --ink:#12263a;
+    --muted:#5b6b7c;
+    --bg:#eef2f7;
+    --card:#ffffff;
+    --line:#e2e8f0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    min-height:100vh;
+    padding:24px;
+  }
+  .deck{width:100%;max-width:960px;}
+  .slide{
+    background:var(--card);
+    border-radius:20px;
+    box-shadow:0 20px 60px rgba(15,44,76,.15);
+    padding:48px 56px;
+    display:none;
+    min-height:540px;
+    overflow:visible;
+    position:relative;
+  }
+  .slide.active{display:flex;flex-direction:column;}
+  .kicker{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--blue);
+    margin-bottom:14px;
+  }
+  .kicker .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);}
+  h1{font-size:38px;line-height:1.12;color:var(--navy);margin-bottom:8px;font-weight:800;letter-spacing:-.01em;}
+  .sub{font-size:18px;color:var(--muted);margin-bottom:26px;line-height:1.45;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px;}
+  .card{
+    background:#f7f9fc;border:1px solid var(--line);border-radius:14px;
+    padding:20px 22px;
+  }
+  .card h3{font-size:17px;color:var(--navy);margin-bottom:6px;font-weight:700;}
+  .card p{font-size:15px;color:var(--muted);line-height:1.5;}
+  .big{
+    display:flex;gap:18px;align-items:flex-start;margin-bottom:16px;
+  }
+  .big .num{
+    flex:0 0 auto;width:42px;height:42px;border-radius:12px;
+    background:linear-gradient(135deg,var(--blue),var(--teal));
+    color:#fff;font-weight:800;font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .big p{font-size:16px;color:var(--ink);line-height:1.5;}
+  .big p strong{color:var(--navy);}
+  /* Slide 1 comparison visual */
+  .compare{display:flex;flex-direction:column;gap:20px;margin-top:2px;}
+  .metric-head{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;color:var(--navy);margin-bottom:10px;}
+  .metric-head em{font-style:normal;color:#c0392b;font-weight:800;}
+  .bar-row{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+  .bar-label{flex:0 0 130px;font-size:14px;color:var(--muted);text-align:right;}
+  .stack{flex:1;display:flex;height:32px;border-radius:9px;overflow:hidden;background:#eef2f7;}
+  .seg{height:100%;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:13px;font-weight:800;min-width:34px;}
+  .seg b{text-shadow:0 1px 2px rgba(0,0,0,.25);}
+  /* role colors */
+  .c-dev{background:#0f2c4c;}
+  .c-fqa{background:#1a73e8;}
+  .c-aqa{background:#e08a2b;}
+  .c-reg{background:#c0392b;}
+  .c-good{background:linear-gradient(90deg,var(--teal),#0a9c8e);}
+  i.c-dev,i.c-fqa,i.c-aqa,i.c-reg{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:7px;vertical-align:middle;}
+  .legend{display:flex;flex-wrap:wrap;gap:20px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);}
+  .legend .lg{font-size:13.5px;color:var(--muted);display:flex;align-items:center;font-weight:600;}
+
+  /* Appendix slide */
+  .apptable{width:100%;border-collapse:collapse;margin-top:4px;font-size:15px;}
+  .apptable th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;padding:0 14px 8px;border-bottom:2px solid var(--line);}
+  .apptable td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--ink);}
+  .apptable td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
+  .apptable .role{display:flex;align-items:center;font-weight:600;color:var(--navy);}
+  .apptable tr.total td{border-bottom:none;border-top:2px solid var(--navy);
+    font-weight:800;color:var(--navy);font-size:16px;padding-top:12px;}
+  .method{margin-top:18px;background:#f7f9fc;border:1px solid var(--line);
+    border-left:4px solid var(--teal);border-radius:12px;padding:16px 20px;}
+  .method h3{font-size:14px;color:var(--navy);margin-bottom:8px;font-weight:800;letter-spacing:.02em;}
+  .method p{font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:5px;}
+  .method p strong{color:var(--navy);}
+  .method p:last-child{margin-bottom:0;}
+
+  /* Solution: 3-step flow */
+  .flow{display:flex;align-items:stretch;gap:12px;margin:14px 0 6px;}
+  .step-card{flex:1;background:#f7f9fc;border:1px solid var(--line);border-radius:16px;
+    padding:26px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .step-ic{width:62px;height:62px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--teal));
+    display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(26,115,232,.28);}
+  .step-ic svg{stroke:#fff;}
+  .step-n{font-size:18px;font-weight:800;color:var(--navy);}
+  .step-card p{font-size:14.5px;color:var(--muted);line-height:1.4;}
+  .arrow{display:flex;align-items:center;font-size:30px;color:#b9c6d4;font-weight:700;}
+
+  /* Value cards */
+  .vcards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px;}
+  .vcard{background:#f7f9fc;border:1px solid var(--line);border-radius:16px;
+    padding:22px 24px;display:flex;align-items:center;gap:18px;}
+  .vic{width:52px;height:52px;flex:0 0 auto;border-radius:14px;
+    background:linear-gradient(135deg,var(--blue),var(--teal));
+    display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(26,115,232,.25);}
+  .vic svg{stroke:#fff;}
+  .vnum{font-size:36px;font-weight:800;color:var(--navy);line-height:1;}
+  .vlab{font-size:15px;color:var(--muted);font-weight:600;line-height:1.35;margin-top:5px;}
+
+  /* Comparison table */
+  .cmp{width:100%;border-collapse:collapse;margin-top:10px;}
+  .cmp th,.cmp td{padding:12px 12px;text-align:center;border-bottom:1px solid var(--line);}
+  .cmp th{font-size:14.5px;color:var(--navy);font-weight:800;vertical-align:bottom;}
+  .cmp th span{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:3px;}
+  .cmp th.cap,.cmp td.cap{text-align:left;color:var(--ink);font-weight:600;font-size:14.5px;width:40%;}
+  .cmp td.cap small{color:var(--muted);font-weight:500;font-size:12px;}
+  .cmp .yes{color:#0a9c8e;font-weight:800;font-size:19px;}
+  .cmp .no{color:#c0392b;font-weight:800;font-size:19px;}
+  .cmp .mid{color:#e08a2b;font-weight:800;font-size:19px;}
+  .cmp th.win{color:#0a9c8e;border-top:3px solid var(--teal);border-radius:9px 9px 0 0;background:rgba(18,181,165,.09);}
+  .cmp td.win{background:rgba(18,181,165,.09);border-left:1px solid rgba(18,181,165,.28);border-right:1px solid rgba(18,181,165,.28);}
+  .cmp tbody tr:last-child td.win{border-bottom:2px solid var(--teal);}
+  .cmp-legend{display:flex;gap:22px;margin-top:14px;font-size:13px;color:var(--muted);font-weight:600;}
+  .cmp-legend b{margin-right:5px;font-size:15px;}
+  .cmp .na{color:#b9c6d4;font-weight:700;font-size:18px;}
+
+  /* Backup / appendix marker */
+  .backup-slide{background:#fafbfd;border:1px dashed #c3cedb;}
+  .backup-slide .kicker{color:#8a97a6;}
+  .backup-slide .kicker .dot{background:#c3cedb;}
+  .backup-ribbon{position:absolute;top:16px;right:0;
+    background:#8a97a6;color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;padding:5px 14px 5px 12px;border-radius:6px 0 0 6px;}
+
+  /* Sources appendix */
+  .srclist{list-style:none;margin-top:6px;}
+  .srclist li{padding:13px 0;border-bottom:1px solid var(--line);}
+  .srclist li:last-child{border-bottom:none;}
+  .sc-claim{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+  .sc-url{display:block;font-size:13px;color:var(--blue);text-decoration:none;word-break:break-all;line-height:1.5;}
+  .sc-url:hover{text-decoration:underline;}
+
+  .stats{display:flex;gap:14px;margin-top:auto;padding-top:22px;}
+  .stat{flex:1;background:var(--navy);color:#fff;border-radius:14px;padding:18px 20px;}
+  .stat .v{font-size:26px;font-weight:800;line-height:1;}
+  .stat .l{font-size:13px;color:#b9cbe0;margin-top:6px;line-height:1.35;}
+  .footer{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:auto;padding-top:20px;font-size:13px;color:var(--muted);
+  }
+  .brand{font-weight:800;color:var(--navy);letter-spacing:.02em;}
+  ul.clean{list-style:none;margin-top:4px;}
+  ul.clean li{
+    font-size:16px;color:var(--ink);line-height:1.5;
+    padding:9px 0 9px 30px;position:relative;border-bottom:1px solid var(--line);
+  }
+  ul.clean li:last-child{border-bottom:none;}
+  ul.clean li:before{
+    content:"";position:absolute;left:4px;top:15px;
+    width:11px;height:11px;border-radius:3px;
+    background:linear-gradient(135deg,var(--blue),var(--teal));
+  }
+  ul.clean li strong{color:var(--navy);}
+  .nav{
+    display:flex;align-items:center;justify-content:center;gap:16px;margin-top:22px;
+  }
+  .nav button{
+    border:none;background:var(--navy);color:#fff;font-size:15px;font-weight:600;
+    padding:10px 20px;border-radius:10px;cursor:pointer;transition:opacity .15s;
+  }
+  .nav button:hover{opacity:.85;}
+  .nav button:disabled{opacity:.35;cursor:default;}
+  .dots{display:flex;gap:8px;}
+  .dots span{width:9px;height:9px;border-radius:50%;background:#c3cedb;cursor:pointer;}
+  .dots span.on{background:var(--blue);width:26px;border-radius:6px;}
+  .hint{font-size:12px;color:var(--muted);margin-top:10px;text-align:center;}
+
+  /* Title / opener slide */
+  .title-slide{background:linear-gradient(135deg,#0f2c4c 0%,#123a63 55%,#0a9c8e 160%);color:#fff;
+    justify-content:center;text-align:center;align-items:center;}
+  .title-slide .logo{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+  .title-slide .logo-img{width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35));}
+  .title-slide .wordmark{font-size:34px;font-weight:800;letter-spacing:.04em;color:#fff;}
+  .title-slide h1{color:#fff;font-size:40px;max-width:760px;margin-bottom:16px;}
+  .title-slide h1 .hl{color:#7fe0d4;}
+  .title-slide .lede{font-size:19px;color:#cfe0f0;max-width:640px;line-height:1.5;margin-bottom:32px;}
+  .badges{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+  .badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+    color:#eaf3fb;font-size:14px;font-weight:600;padding:9px 16px;border-radius:999px;}
+
+  /* ---- Mobile ---- */
+  @media (max-width:640px){
+    body{padding:12px;}
+    .slide{padding:26px 20px;min-height:0;border-radius:16px;}
+    h1{font-size:24px;}
+    .title-slide .logo-img{width:44px;height:44px;}
+    .title-slide .wordmark{font-size:26px;}
+    .title-slide h1{font-size:27px;}
+    .title-slide .lede{font-size:15px;margin-bottom:24px;}
+    .badge{font-size:12px;padding:7px 12px;}
+    .sub{font-size:15px;margin-bottom:20px;}
+    .kicker{font-size:11px;margin-bottom:10px;}
+
+    /* stack the comparison bars: label on its own line */
+    .bar-row{flex-direction:column;align-items:stretch;gap:5px;margin-bottom:12px;}
+    .bar-label{flex:none;text-align:left;font-size:13px;font-weight:600;color:var(--navy);}
+    .stack{height:30px;}
+    .seg{font-size:11px;min-width:26px;}
+    .metric-head{font-size:14px;align-items:flex-start;}
+    .metric-head svg{flex:0 0 auto;}
+    .legend{gap:10px 16px;}
+    .legend .lg{font-size:12px;}
+
+    /* solution flow + value cards */
+    .flow{flex-direction:column;gap:8px;}
+    .step-card{flex-direction:row;justify-content:flex-start;text-align:left;padding:14px 16px;gap:14px;}
+    .step-ic{width:44px;height:44px;border-radius:12px;}
+    .step-ic svg{width:24px;height:24px;}
+    .arrow{justify-content:center;transform:rotate(90deg);font-size:22px;}
+    .vcards{grid-template-columns:1fr;gap:10px;}
+    .vcard{padding:16px 18px;gap:14px;}
+    .vnum{font-size:28px;}
+    .vlab{font-size:13.5px;}
+    /* comparison table */
+    .cmp th,.cmp td{padding:8px 5px;}
+    .cmp th{font-size:11px;}
+    .cmp th span{font-size:9px;}
+    .cmp th.cap,.cmp td.cap{font-size:12px;width:44%;}
+    .cmp td.cap small{font-size:10.5px;}
+    .cmp .yes,.cmp .no,.cmp .mid{font-size:16px;}
+    .stats{flex-direction:column;gap:10px;}
+    .stat{padding:14px 16px;}
+    .stat .v{font-size:22px;}
+    ul.clean li{font-size:14px;padding:8px 0 8px 26px;}
+
+    /* appendix table */
+    .apptable{font-size:12.5px;}
+    .apptable th{font-size:10px;padding:0 7px 6px;}
+    .apptable td{padding:8px 7px;}
+    .apptable .role{font-size:12.5px;}
+    .apptable tr.total td{font-size:13px;}
+    .method{padding:13px 15px;}
+    .method p{font-size:12.5px;}
+    .sc-claim{font-size:13px;}
+    .sc-url{font-size:11.5px;}
+
+    /* footer & nav */
+    .footer{flex-direction:column;align-items:flex-start;gap:4px;font-size:11.5px;margin-top:22px;}
+    .nav button{padding:9px 16px;font-size:14px;}
+    .hint{font-size:11px;}
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- SLIDE 0: TITLE / OPENER -->
+  <section class="slide title-slide active">
+    <div class="logo">
+      <img class="logo-img" alt="Waterwheel logo" src="data:image/png;base64,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">
+      <span class="wordmark">Waterwheel</span>
+    </div>
+    <h1>Automated QA that runs inside <span class="hl">your own stack</span></h1>
+    <p class="lede">Waterwheel turns plain-English descriptions into real end-to-end browser tests — running in your environment, in your pipeline, with your choice of AI. No brittle scripts. No data leaving your network.</p>
+    <div class="badges">
+      <span class="badge">Plain-English tests</span>
+      <span class="badge">Runs in your environment</span>
+      <span class="badge">Fits your CI &amp; coding agents</span>
+      <span class="badge">Data never leaves</span>
+    </div>
+  </section>
+
+  <!-- SLIDE 1: PROBLEM -->
+  <section class="slide">
+    <span class="kicker"><span class="dot"></span>The Problem</span>
+    <h1>Every release runs the same slow, brittle gauntlet</h1>
+    <p class="sub">Before a feature ships, your team has to prove the app still works. Manual passes are slow, and automated scripts break constantly — swallowing 40–50% of QA effort in upkeep alone.</p>
+
+    <div class="compare">
+      <!-- TIME ROW -->
+      <div class="metric">
+        <div class="metric-head">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#0f2c4c" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg>
+          <span>Time per full test round — <em>~7 hours by hand</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Testing by hand</span>
+          <div class="stack">
+            <div class="seg c-dev" style="width:14%"><b>1.0h</b></div>
+            <div class="seg c-fqa" style="width:29%"><b>2.0h</b></div>
+            <div class="seg c-aqa" style="width:29%"><b>2.0h</b></div>
+            <div class="seg c-reg" style="width:28%"><b>2.0h</b></div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">With Waterwheel</span>
+          <div class="stack"><div class="seg c-good" style="width:8%"><b>~8 min</b></div></div>
+        </div>
+      </div>
+
+      <!-- COST ROW -->
+      <div class="metric">
+        <div class="metric-head">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#0f2c4c" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2.5 0 0 1 2.5-2 2 2 0 0 1 0 4 2 2 0 0 0 0 4 2.5 2.5 0 0 1-2.5-2"/></svg>
+          <span>Cost per full test round — <em>~$390 by hand</em></span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Testing by hand</span>
+          <div class="stack">
+            <div class="seg c-dev" style="width:23%"><b>$90</b></div>
+            <div class="seg c-fqa" style="width:23%"><b>$90</b></div>
+            <div class="seg c-aqa" style="width:31%"><b>$120</b></div>
+            <div class="seg c-reg" style="width:23%"><b>$90</b></div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">With Waterwheel</span>
+          <div class="stack"><div class="seg c-good" style="width:2.5%;min-width:56px"><b>~$2</b></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="lg"><i class="c-dev"></i>Developer time</span>
+      <span class="lg"><i class="c-fqa"></i>Manual testing</span>
+      <span class="lg"><i class="c-aqa"></i>Writing test scripts</span>
+      <span class="lg"><i class="c-reg"></i>Re-checking everything</span>
+    </div>
+
+    <div class="footer">
+      <span class="brand">WATERWHEEL</span>
+      <span>Illustrative role breakdown. Waterwheel figures based on a real 3-test benchmark run.</span>
+    </div>
+  </section>
+
+  <!-- SLIDE 2: SOLUTION -->
+  <section class="slide">
+    <span class="kicker"><span class="dot"></span>The Solution</span>
+    <h1>Describe a test in plain English — Waterwheel runs it</h1>
+    <p class="sub">It drives a real browser and reasons about the page, like your best manual tester. No selectors, no scripts to maintain.</p>
+    <div class="flow">
+      <div class="step-card">
+        <div class="step-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></div>
+        <div class="step-n">1 · Describe</div>
+        <p>In plain English</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step-card">
+        <div class="step-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="15" rx="2"/><path d="M3 8h18"/><path d="M10 12l4 2.5-4 2.5z"/></svg></div>
+        <div class="step-n">2 · Run</div>
+        <p>Runs in a real browser</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step-card">
+        <div class="step-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div>
+        <div class="step-n">3 · Result</div>
+        <p>Clear pass / fail</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="v">In your stack</div><div class="l">runs where your app runs</div></div>
+      <div class="stat"><div class="v">In your CI</div><div class="l">one Docker image, any pipeline</div></div>
+      <div class="stat"><div class="v">Pennies</div><div class="l">of compute per run</div></div>
+    </div>
+  </section>
+
+  <!-- SLIDE: DIFFERENTIATION vs EXISTING TOOLS -->
+  <section class="slide">
+    <span class="kicker"><span class="dot"></span>Why It Wins</span>
+    <h1>Modern AI testing — without handing over your data</h1>
+    <p class="sub">Complex, dependent flows — <strong>sign up → activate by email → start a paid subscription</strong> — handled end to end, inside your perimeter.</p>
+    <table class="cmp">
+      <thead>
+        <tr>
+          <th class="cap">Capability</th>
+          <th>Script tools<span>Selenium · Cypress</span></th>
+          <th>AI cloud tools<span>testRigor · mabl</span></th>
+          <th class="win">Waterwheel</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="cap">Tests written in plain English</td><td class="no">✗</td><td class="yes">✓</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Survives redesigns — no brittle selectors to fix</td><td class="no">✗</td><td class="yes">✓</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Passes state between steps <small>(generated logins, activation links)</small></td><td class="no">✗</td><td class="mid">~</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Private test-and-fix loop with your coding agents</td><td class="no">✗</td><td class="no">✗</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Runs in your environment — data never leaves</td><td class="yes">✓</td><td class="no">✗</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Your tests, your infra — no vendor lock-in</td><td class="yes">✓</td><td class="no">✗</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Your choice of AI model <small>(incl. self-hosted)</small></td><td class="na">—</td><td class="no">✗</td><td class="win yes">✓</td></tr>
+      </tbody>
+    </table>
+    <div class="cmp-legend">
+      <span><b class="yes">✓</b> Full support</span>
+      <span><b class="mid">~</b> Partial / limited</span>
+      <span><b class="no">✗</b> Not supported</span>
+    </div>
+    <div class="footer">
+      <span class="brand">WATERWHEEL</span>
+      <span>Everything the cloud tools do — and it never leaves your network.</span>
+    </div>
+  </section>
+
+  <!-- SLIDE: FITS YOUR STACK -->
+  <section class="slide">
+    <span class="kicker"><span class="dot"></span>Fits Your Stack</span>
+    <h1>Drops into the pipeline you already run</h1>
+    <p class="sub">No platform to adopt, no data to hand over — Waterwheel meets your engineering workflow where it is.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>One Docker image</h3>
+        <p>Pull it and run — locally, on a CI runner, or in your own cluster. Nothing to stand up, works in any pipeline.</p>
+      </div>
+      <div class="card">
+        <h3>A private test-and-fix loop</h3>
+        <p>Connect your coding agents (Claude Code, Cursor) so they run tests, read the failures, and fix their own code — entirely inside your network, never a vendor cloud.</p>
+      </div>
+      <div class="card">
+        <h3>Bring your own AI</h3>
+        <p>Any major provider, or a self-hosted model. Your key, your model choice, your cost control — no lock-in to ours.</p>
+      </div>
+      <div class="card">
+        <h3>Inside your perimeter</h3>
+        <p>Source, app, and test data stay on your systems. Built for teams with real security and compliance requirements.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE: THE PAYOFF -->
+  <section class="slide">
+    <span class="kicker"><span class="dot"></span>The Payoff</span>
+    <h1>What your engineering org gets</h1>
+    <p class="sub">Faster releases, far less test upkeep, and a QA layer that satisfies security and compliance.</p>
+    <div class="vcards">
+      <div class="vcard">
+        <div class="vic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg></div>
+        <div><div class="vnum">~8 min</div><div class="vlab">release-ready run, unattended — vs ~7 hrs by hand</div></div>
+      </div>
+      <div class="vcard">
+        <div class="vic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4l-6 6 2 2 6-6a4 4 0 0 0 5.4-5.4l-2.3 2.3-2-2z"/></svg></div>
+        <div><div class="vnum">~50%</div><div class="vlab">less time lost to test maintenance</div></div>
+      </div>
+      <div class="vcard">
+        <div class="vic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div>
+        <div><div class="vnum">0</div><div class="vlab">lines of test code to write</div></div>
+      </div>
+      <div class="vcard">
+        <div class="vic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="M9.5 12l1.8 1.8 3.5-3.6"/></svg></div>
+        <div><div class="vnum">100%</div><div class="vlab">inside your perimeter — compliance-ready</div></div>
+      </div>
+    </div>
+    <div class="footer">
+      <span class="brand">WATERWHEEL</span>
+      <span>Ship faster, maintain less, and keep everything in-house.</span>
+    </div>
+  </section>
+
+  <!-- SLIDE: CALL TO ACTION -->
+  <section class="slide title-slide">
+    <div class="logo">
+      <img class="logo-img" alt="Waterwheel logo" src="data:image/png;base64,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">
+      <span class="wordmark">Waterwheel</span>
+    </div>
+    <h1>See it run in <span class="hl">your environment</span></h1>
+    <p class="lede">Pull the Docker image, point it at your app, and watch Waterwheel test a real user flow — in minutes, on your own infrastructure.</p>
+    <div class="badges">
+      <span class="badge">1 · Pull the image</span>
+      <span class="badge">2 · Point it at your app</span>
+      <span class="badge">3 · First test in minutes</span>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prev">‹ Back</button>
+  <div class="dots" id="dots"></div>
+  <button id="next">Next ›</button>
+</div>
+<div class="hint">Use the arrows, the dots, or your ← → keyboard keys to move between slides.</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const dotsWrap=document.getElementById('dots');
+  const prev=document.getElementById('prev');
+  const next=document.getElementById('next');
+  let i=0;
+  slides.forEach((_,idx)=>{
+    const d=document.createElement('span');
+    d.addEventListener('click',()=>go(idx));
+    dotsWrap.appendChild(d);
+  });
+  const dots=[...dotsWrap.children];
+  function go(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,idx)=>s.classList.toggle('active',idx===i));
+    dots.forEach((d,idx)=>d.classList.toggle('on',idx===i));
+    prev.disabled=i===0;
+    next.disabled=i===slides.length-1;
+  }
+  prev.addEventListener('click',()=>go(i-1));
+  next.addEventListener('click',()=>go(i+1));
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight')go(i+1);
+    if(e.key==='ArrowLeft')go(i-1);
+  });
+  go(0);
+</script>
+</body>
+</html>
