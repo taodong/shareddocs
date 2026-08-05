@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Waterwheel — Investor Slides</title>
+<title>Waterwheel — Automated QA for Engineering Teams</title>
 <style>
   :root{
     --navy:#0f2c4c;
@@ -142,6 +142,21 @@
   .cmp-legend b{margin-right:5px;font-size:15px;}
   .cmp .na{color:#b9c6d4;font-weight:700;font-size:18px;}
 
+  /* Limitation -> answer layout */
+  .lawrap{display:flex;flex-direction:column;gap:7px;margin-top:4px;}
+  .larow{display:grid;grid-template-columns:1fr 38px 1fr;align-items:center;}
+  .lahead{margin-bottom:0;}
+  .lahead .lh{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:0 4px;}
+  .lahead .lh-bad{color:#c0392b;}
+  .lahead .lh-good{color:#0a9c8e;text-align:left;}
+  .lacell{padding:10px 15px;border-radius:11px;font-size:13.5px;line-height:1.35;}
+  .lacell b{font-weight:800;}
+  .la-bad{background:#fdf2f0;border:1px solid #f1cfca;color:#5b3a36;}
+  .la-bad b{color:#c0392b;}
+  .la-good{background:rgba(18,181,165,.09);border:1px solid rgba(18,181,165,.30);color:#245a54;}
+  .la-good b{color:#0a9c8e;}
+  .la-arrow{text-align:center;color:#b9c6d4;font-size:20px;font-weight:700;}
+
   /* Backup / appendix marker */
   .backup-slide{background:#fafbfd;border:1px dashed #c3cedb;}
   .backup-slide .kicker{color:#8a97a6;}
@@ -246,6 +261,11 @@
     .cmp th.cap,.cmp td.cap{font-size:12px;width:44%;}
     .cmp td.cap small{font-size:10.5px;}
     .cmp .yes,.cmp .no,.cmp .mid{font-size:16px;}
+    /* limitation -> answer */
+    .larow{grid-template-columns:1fr;gap:4px;}
+    .larow.lahead{display:none;}
+    .la-arrow{transform:rotate(90deg);font-size:16px;}
+    .lacell{font-size:13px;padding:10px 13px;}
     .stats{flex-direction:column;gap:10px;}
     .stat{padding:14px 16px;}
     .stat .v{font-size:22px;}
@@ -278,21 +298,21 @@
       <img class="logo-img" alt="Waterwheel logo" src="data:image/png;base64,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">
       <span class="wordmark">Waterwheel</span>
     </div>
-    <h1>An AI agent that tests websites <span class="hl">automatically</span></h1>
-    <p class="lede">A test is described in plain English. Waterwheel then opens a real browser, runs it like a person would, and reports back — with no coding and no scripts to maintain.</p>
+    <h1>Automated QA that runs inside <span class="hl">your own stack</span></h1>
+    <p class="lede">Waterwheel turns plain-English descriptions into real end-to-end browser tests — running in your environment, in your pipeline, with your choice of AI. No brittle scripts. No data leaving your network.</p>
     <div class="badges">
       <span class="badge">Plain-English tests</span>
-      <span class="badge">Pennies per test</span>
-      <span class="badge">Runs anywhere</span>
-      <span class="badge">Data stays private</span>
+      <span class="badge">Runs in your environment</span>
+      <span class="badge">Fits your CI &amp; coding agents</span>
+      <span class="badge">Data never leaves</span>
     </div>
   </section>
 
   <!-- SLIDE 1: PROBLEM -->
   <section class="slide">
     <span class="kicker"><span class="dot"></span>The Problem</span>
-    <h1>Testing a website today is slow and expensive</h1>
-    <p class="sub">Before any new feature reaches customers, someone must confirm the site still works. The old ways cost hours and real money — every single release.</p>
+    <h1>Every release runs the same slow, brittle gauntlet</h1>
+    <p class="sub">Before a feature ships, your team has to prove the app still works. Manual passes are slow, and automated scripts break constantly — swallowing 40–50% of QA effort in upkeep alone.</p>
 
     <div class="compare">
       <!-- TIME ROW -->
@@ -354,8 +374,8 @@
   <!-- SLIDE 2: SOLUTION -->
   <section class="slide">
     <span class="kicker"><span class="dot"></span>The Solution</span>
-    <h1>It tests a website the way a person would</h1>
-    <p class="sub">Three simple steps. No coding, no scripts to maintain.</p>
+    <h1>Describe a test in plain English — Waterwheel runs it</h1>
+    <p class="sub">It drives a real browser and reasons about the page, like your best manual tester. No selectors, no scripts to maintain.</p>
     <div class="flow">
       <div class="step-card">
         <div class="step-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></div>
@@ -376,17 +396,17 @@
       </div>
     </div>
     <div class="stats">
-      <div class="stat"><div class="v">Pennies</div><div class="l">per test</div></div>
-      <div class="stat"><div class="v">Private</div><div class="l">runs on the customer's own systems</div></div>
-      <div class="stat"><div class="v">Anywhere</div><div class="l">any computer or system</div></div>
+      <div class="stat"><div class="v">In your stack</div><div class="l">runs where your app runs</div></div>
+      <div class="stat"><div class="v">In your CI</div><div class="l">one Docker image, any pipeline</div></div>
+      <div class="stat"><div class="v">Pennies</div><div class="l">of compute per run</div></div>
     </div>
   </section>
 
   <!-- SLIDE: DIFFERENTIATION vs EXISTING TOOLS -->
   <section class="slide">
     <span class="kicker"><span class="dot"></span>Why It Wins</span>
-    <h1>Built for the messy, multi-step tests that break other tools</h1>
-    <p class="sub">Real flows like <strong>sign up → activate by email → start a paid subscription</strong>, where each step depends on the one before it.</p>
+    <h1>Modern AI testing — without handing over your data</h1>
+    <p class="sub">Complex, dependent flows — <strong>sign up → activate by email → start a paid subscription</strong> — handled end to end, inside your perimeter.</p>
     <table class="cmp">
       <thead>
         <tr>
@@ -398,12 +418,12 @@
       </thead>
       <tbody>
         <tr><td class="cap">Tests written in plain English</td><td class="no">✗</td><td class="yes">✓</td><td class="win yes">✓</td></tr>
-        <tr><td class="cap">Keeps working after a site redesign</td><td class="no">✗</td><td class="yes">✓</td><td class="win yes">✓</td></tr>
-        <tr><td class="cap">Handles long, multi-step journeys</td><td class="mid">~</td><td class="yes">✓</td><td class="win yes">✓</td></tr>
-        <tr><td class="cap">Passes information from one step to the next <small>(e.g. new logins, email links)</small></td><td class="no">✗</td><td class="mid">~</td><td class="win yes">✓</td></tr>
-        <tr><td class="cap">Runs on the customer's own systems — data never leaves</td><td class="yes">✓</td><td class="no">✗</td><td class="win yes">✓</td></tr>
-        <tr><td class="cap">Customer keeps full ownership — no vendor lock-in</td><td class="yes">✓</td><td class="no">✗</td><td class="win yes">✓</td></tr>
-        <tr><td class="cap">Works with the customer's choice of AI</td><td class="na">—</td><td class="no">✗</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Survives redesigns — no brittle selectors to fix</td><td class="no">✗</td><td class="yes">✓</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Passes state between steps <small>(generated logins, activation links)</small></td><td class="no">✗</td><td class="mid">~</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Private test-and-fix loop with your coding agents</td><td class="no">✗</td><td class="no">✗</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Runs in your environment — data never leaves</td><td class="yes">✓</td><td class="no">✗</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Your tests, your infra — no vendor lock-in</td><td class="yes">✓</td><td class="no">✗</td><td class="win yes">✓</td></tr>
+        <tr><td class="cap">Your choice of AI model <small>(incl. self-hosted)</small></td><td class="na">—</td><td class="no">✗</td><td class="win yes">✓</td></tr>
       </tbody>
     </table>
     <div class="cmp-legend">
@@ -413,111 +433,113 @@
     </div>
     <div class="footer">
       <span class="brand">WATERWHEEL</span>
-      <span>Matches modern AI tools on ease — and wins on control: private, portable, and customer-owned.</span>
+      <span>Everything the cloud tools do — and it never leaves your network.</span>
     </div>
   </section>
 
-  <!-- SLIDE 3: CLIENT & VALUE -->
+  <!-- SLIDE: AI PLATFORM LIMITATIONS -> ANSWER -->
   <section class="slide">
-    <span class="kicker"><span class="dot"></span>The Customer &amp; The Value</span>
-    <h1>Who uses it — and what they gain</h1>
-    <p class="sub">For any team that builds or runs a website — software teams, startups, agencies, online businesses.</p>
+    <span class="kicker"><span class="dot"></span>Vs. AI Test Platforms</span>
+    <h1>Where the leading AI test platforms fall short</h1>
+    <p class="sub">The same gap runs through testRigor, mabl, TestSprite, QA.tech, and Testim: they're cloud SaaS you rent and don't control. Waterwheel closes each one.</p>
+    <div class="lawrap">
+      <div class="larow lahead">
+        <span class="lh lh-bad">Their limitation</span><span></span><span class="lh lh-good">The Waterwheel answer</span>
+      </div>
+      <div class="larow">
+        <div class="lacell la-bad"><b>Cloud-only</b> — your app, source, and test data run on their servers</div>
+        <div class="la-arrow">→</div>
+        <div class="lacell la-good"><b>Self-hosted</b> in your own Docker — nothing leaves your network</div>
+      </div>
+      <div class="larow">
+        <div class="lacell la-bad"><b>Locked in the platform</b> — tests live in their cloud, often no exportable code</div>
+        <div class="la-arrow">→</div>
+        <div class="lacell la-good"><b>You own the tests</b> — plain-English Markdown files kept in your repo</div>
+      </div>
+      <div class="larow">
+        <div class="lacell la-bad"><b>Rented per seat &amp; per test run</b> — ~$450–$1,000+/mo, up to $40k+/yr</div>
+        <div class="la-arrow">→</div>
+        <div class="lacell la-good"><b>Self-hosted licensing</b> — no per-seat fees or per-test-run cloud metering</div>
+      </div>
+      <div class="larow">
+        <div class="lacell la-bad"><b>Their fixed AI model</b>, running in their cloud</div>
+        <div class="la-arrow">→</div>
+        <div class="lacell la-good"><b>Bring your own model</b> — any provider, or self-hosted so LLM traffic stays in-house</div>
+      </div>
+      <div class="larow">
+        <div class="lacell la-bad"><b>Opaque, limited control</b> — reusable logic and self-healing you can't inspect</div>
+        <div class="la-arrow">→</div>
+        <div class="lacell la-good"><b>Full control</b> — teach the agent with your own readable skills, swappable per environment</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE: FITS YOUR STACK -->
+  <section class="slide">
+    <span class="kicker"><span class="dot"></span>Fits Your Stack</span>
+    <h1>Drops into the pipeline you already run</h1>
+    <p class="sub">No platform to adopt, no data to hand over — Waterwheel meets your engineering workflow where it is.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>One Docker image</h3>
+        <p>Pull it and run — locally, on a CI runner, or in your own cluster. Nothing to stand up, works in any pipeline.</p>
+      </div>
+      <div class="card">
+        <h3>A private test-and-fix loop</h3>
+        <p>Connect your coding agents (Claude Code, Cursor) so they run tests, read the failures, and fix their own code — entirely inside your network, never a vendor cloud.</p>
+      </div>
+      <div class="card">
+        <h3>Bring your own AI</h3>
+        <p>Any major provider, or a self-hosted model. Your key, your model choice, your cost control — no lock-in to ours.</p>
+      </div>
+      <div class="card">
+        <h3>Inside your perimeter</h3>
+        <p>Source, app, and test data stay on your systems. Built for teams with real security and compliance requirements.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE: THE PAYOFF -->
+  <section class="slide">
+    <span class="kicker"><span class="dot"></span>The Payoff</span>
+    <h1>What your engineering org gets</h1>
+    <p class="sub">Faster releases, far less test upkeep, and a QA layer that satisfies security and compliance.</p>
     <div class="vcards">
       <div class="vcard">
         <div class="vic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg></div>
-        <div><div class="vnum">~8 min</div><div class="vlab">unattended — vs ~7 hrs of human effort by hand</div></div>
+        <div><div class="vnum">~8 min</div><div class="vlab">release-ready run, unattended — vs ~7 hrs by hand</div></div>
       </div>
       <div class="vcard">
-        <div class="vic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2.5 0 0 1 2.5-2 2 2 0 0 1 0 4 2 2 0 0 0 0 4 2.5 2.5 0 0 1-2.5-2"/></svg></div>
-        <div><div class="vnum">~1%</div><div class="vlab">of manual testing cost</div></div>
+        <div class="vic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4l-6 6 2 2 6-6a4 4 0 0 0 5.4-5.4l-2.3 2.3-2-2z"/></svg></div>
+        <div><div class="vnum">~50%</div><div class="vlab">less time lost to test maintenance</div></div>
       </div>
       <div class="vcard">
         <div class="vic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div>
-        <div><div class="vnum">0</div><div class="vlab">lines of code to write</div></div>
+        <div><div class="vnum">0</div><div class="vlab">lines of test code to write</div></div>
       </div>
       <div class="vcard">
         <div class="vic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="M9.5 12l1.8 1.8 3.5-3.6"/></svg></div>
-        <div><div class="vnum">100%</div><div class="vlab">private — runs on the customer's systems</div></div>
+        <div><div class="vnum">100%</div><div class="vlab">inside your perimeter — compliance-ready</div></div>
       </div>
     </div>
     <div class="footer">
       <span class="brand">WATERWHEEL</span>
-      <span>Skip the QA bottleneck. Ship with confidence.</span>
+      <span>Ship faster, maintain less, and keep everything in-house.</span>
     </div>
   </section>
 
-  <!-- SLIDE 4: APPENDIX / ASSUMPTIONS -->
-  <section class="slide backup-slide">
-    <span class="backup-ribbon">Backup — not part of the main flow</span>
-    <span class="kicker"><span class="dot"></span>Appendix</span>
-    <h1>How we calculated the manual baseline</h1>
-    <p class="sub">Bottom-up estimate for one full regression round of a web feature on a mid-size team. Deliberately conservative — real teams often spend more.</p>
-
-    <table class="apptable">
-      <thead>
-        <tr><th>Role / activity</th><th style="text-align:right">Time</th><th style="text-align:right">Loaded rate</th><th style="text-align:right">Cost</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="role"><i class="c-dev"></i>Developer time (setup &amp; fixes)</span></td>
-          <td class="num">1.0 h</td><td class="num">$90 / h</td><td class="num">$90</td>
-        </tr>
-        <tr>
-          <td><span class="role"><i class="c-fqa"></i>Manual testing</span></td>
-          <td class="num">2.0 h</td><td class="num">$45 / h</td><td class="num">$90</td>
-        </tr>
-        <tr>
-          <td><span class="role"><i class="c-aqa"></i>Writing &amp; maintaining test scripts</span></td>
-          <td class="num">2.0 h</td><td class="num">$60 / h</td><td class="num">$120</td>
-        </tr>
-        <tr>
-          <td><span class="role"><i class="c-reg"></i>Re-checking everything still works</span></td>
-          <td class="num">2.0 h</td><td class="num">$45 / h</td><td class="num">$90</td>
-        </tr>
-        <tr class="total">
-          <td>Total, one test round</td>
-          <td class="num">7.0 h</td><td class="num">—</td><td class="num">$390</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="method">
-      <h3>Methodology &amp; sources</h3>
-      <p><strong>Loaded rate</strong> = base salary &times; ~1.35 (benefits + overhead) &divide; ~2,080 work hours/year. Base salaries from US market data (Glassdoor, levels.fyi, BLS).</p>
-      <p><strong>Waterwheel side is measured, not estimated:</strong> a real 3-test benchmark suite ran in 483 s (~8 min) at ~$1.66 in API cost.</p>
-      <p><strong>Robust to challenge:</strong> even if you halve every estimate above, Waterwheel is still ~25&times; faster and ~100&times; cheaper. The case rests on orders of magnitude, not any single figure.</p>
+  <!-- SLIDE: CALL TO ACTION -->
+  <section class="slide title-slide">
+    <div class="logo">
+      <img class="logo-img" alt="Waterwheel logo" src="data:image/png;base64,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">
+      <span class="wordmark">Waterwheel</span>
     </div>
-  </section>
-
-  <!-- SLIDE: APPENDIX — SOURCES -->
-  <section class="slide backup-slide">
-    <span class="backup-ribbon">Backup — not part of the main flow</span>
-    <span class="kicker"><span class="dot"></span>Appendix</span>
-    <h1>Sources behind the comparison</h1>
-    <p class="sub">Industry references used for the "Why It Wins" competitive claims (accessed July 2026).</p>
-    <ul class="srclist">
-      <li>
-        <div class="sc-claim">Script tools break on brittle selectors; teams spend ~40–50% of test effort on maintenance</div>
-        <a class="sc-url" href="https://getautonoma.com/blog/selenium-playwright-cypress-comparison">getautonoma.com/blog/selenium-playwright-cypress-comparison</a>
-        <a class="sc-url" href="https://stackoverflow.blog/2026/06/15/selenium-vs-cypress-vs-playwright-choosing-your-test-automation-framework/">stackoverflow.blog — Selenium vs Cypress vs Playwright (Jun 2026)</a>
-      </li>
-      <li>
-        <div class="sc-claim">AI cloud tools removed selectors and made tests plain-English &amp; self-healing (testRigor, mabl)</div>
-        <a class="sc-url" href="https://testrigor.com/alternative/mabl/">testrigor.com/alternative/mabl</a>
-        <a class="sc-url" href="https://getautonoma.com/blog/ai-testing-platform-comparison">getautonoma.com/blog/ai-testing-platform-comparison</a>
-      </li>
-      <li>
-        <div class="sc-claim">2026 landscape of AI testing platforms and agentic (natural-language) test authoring</div>
-        <a class="sc-url" href="https://qa.tech/blog/the-13-best-ai-testing-tools-in-2026">qa.tech/blog/the-13-best-ai-testing-tools-in-2026</a>
-      </li>
-      <li>
-        <div class="sc-claim">Cloud-tool pricing — testRigor Pro ≈ $900–1k/mo; mabl ≈ $450–3k/mo, Enterprise $40k+/yr</div>
-        <a class="sc-url" href="https://getautonoma.com/blog/testrigor-pricing">getautonoma.com/blog/testrigor-pricing</a>
-        <a class="sc-url" href="https://getautonoma.com/blog/mabl-pricing">getautonoma.com/blog/mabl-pricing</a>
-      </li>
-    </ul>
-    <div class="method">
-      <p><strong>Note:</strong> categories are representative of each approach, not exhaustive of every vendor. Cloud-tool pricing is third-party estimate — testRigor and mabl gate exact figures behind sales. Waterwheel has no license or subscription fee; you pay only your own AI provider's token usage (~$1.66 measured for a 3-test benchmark run, i.e. pennies per test). Waterwheel capabilities are drawn from its own product documentation.</p>
+    <h1>See it run in <span class="hl">your environment</span></h1>
+    <p class="lede">Pull the Docker image, point it at your app, and watch Waterwheel test a real user flow — in minutes, on your own infrastructure.</p>
+    <div class="badges">
+      <span class="badge">1 · Pull the image</span>
+      <span class="badge">2 · Point it at your app</span>
+      <span class="badge">3 · First test in minutes</span>
     </div>
   </section>
 
