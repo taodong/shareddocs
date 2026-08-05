@@ -143,13 +143,13 @@
   .cmp .na{color:#b9c6d4;font-weight:700;font-size:18px;}
 
   /* Limitation -> answer layout */
-  .lawrap{display:flex;flex-direction:column;gap:7px;margin-top:4px;}
-  .larow{display:grid;grid-template-columns:1fr 38px 1fr;align-items:center;}
+  .lawrap{display:flex;flex-direction:column;gap:5px;margin-top:2px;}
+  .larow{display:grid;grid-template-columns:1fr 34px 1fr;align-items:center;}
   .lahead{margin-bottom:0;}
   .lahead .lh{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:0 4px;}
   .lahead .lh-bad{color:#c0392b;}
   .lahead .lh-good{color:#0a9c8e;text-align:left;}
-  .lacell{padding:10px 15px;border-radius:11px;font-size:13.5px;line-height:1.35;}
+  .lacell{padding:8px 14px;border-radius:10px;font-size:13px;line-height:1.3;}
   .lacell b{font-weight:800;}
   .la-bad{background:#fdf2f0;border:1px solid #f1cfca;color:#5b3a36;}
   .la-bad b{color:#c0392b;}
@@ -470,6 +470,11 @@
         <div class="lacell la-bad"><b>Opaque, limited control</b> — reusable logic and self-healing you can't inspect</div>
         <div class="la-arrow">→</div>
         <div class="lacell la-good"><b>Full control</b> — teach the agent with your own readable skills, swappable per environment</div>
+      </div>
+      <div class="larow">
+        <div class="lacell la-bad"><b>Self-healing can silently pass the wrong element</b> — a false green hides a real bug</div>
+        <div class="la-arrow">→</div>
+        <div class="lacell la-good"><b>Fails loudly with a reason</b> — reads the page fresh each run, no stored locators to drift</div>
       </div>
     </div>
   </section>
